@@ -1,0 +1,5 @@
+{
+    "news": {"color": "#5555ff", "level": "ok"},
+    "info": {"color": "#55ff55", "level": "ok"},
+    "fakes": {"color": "#ff5555", "level": "warning"}
+}
