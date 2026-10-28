@@ -4,6 +4,6 @@
         "tags": ["news"]        
     },
     "wikipedia.org":{"tags": ["info"]},
-    "rt.com": {"tags": ["fakes"]},
+    "rt.com": {"tags": ["fakes"], "level": "warning"},
     "rt-english.com": {"alias": "rt.com"}
 }
