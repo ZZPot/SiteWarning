@@ -1,6 +1,5 @@
 const LIST_URL = "https://example.com/blocked-sites.txt";
-import {tags} from "./tags.json"
-import {sites} from "./site_list.json"
+
 // Интервал обновления списка (в минутах)
 const UPDATE_INTERVAL_MINUTES = 60;
 
@@ -8,10 +7,15 @@ const UPDATE_INTERVAL_MINUTES = 60;
 let siteList = {};
 let lastUpdate = 0;
 let localList = true;
+let tags = await (await fetch(browser.runtime.getURL("./tags.json"))).json();
+console.log(tags)
 
 async function loadList() {
   if (localList)
-    siteList = sites
+  {
+    siteList =  await (await fetch(browser.runtime.getURL("./site_list.json"))).json()
+    console.log("Local site list")
+  }
   else
     try {
       const response = await fetch(LIST_URL);
@@ -27,30 +31,44 @@ async function loadList() {
 
 function getSite(url) {
   try {
+    console.log(siteList)
     const hostname = new URL(url).hostname.toLowerCase();
-    
-    let siteKey = Object.entries(siteList).find(siteName => 
+    console.log("Check " + hostname)
+    let siteKey = Object.keys(siteList).find(siteName => 
     {
+      console.log(siteName)
       if (!siteName.includes("://"))
-        return hostname === entry || hostname.endsWith("." + entry);
-      return url.toLowerCase().startsWith(entry);
+      {
+        console.log("Comparing " + siteName + " and " + hostname)
+        return hostname === siteName || hostname.endsWith("." + siteName);
+      }
+      return url.toLowerCase().startsWith(siteName);
     });
     if (siteKey === undefined)
+    {
+      console.log("Сайт не в списке")
       return null;
+    }
     let siteData = siteList[siteKey]
     if ("alias" in siteData)
       return siteList[siteData["alias"]]
     else
       return siteData
-  } catch {
+  } catch (err){
+    console.error("Error" + err)
     return null;
   }
 }
 
-// Показ уведомления
+
+function onSiteFound(url, siteData)
+{
+  if (siteData["level"] == "warning")
+    notify(url, siteData)
+}
 function notify(url, siteData) {
   let msg = ""
-  if (tags in siteData && siteData["tags"].length != 0)
+  if ("tags" in siteData && siteData["tags"].length != 0)
   {
     msg += siteData["tags"].join(', ')
   }
@@ -72,11 +90,10 @@ async function checkTab(tabId, url) {
   }
   let siteData = getSite(url)
   if (siteData) {
-    notify(url, siteData);
+    onSiteFound(url, siteData);
   }
 }
 
-// Слушаем переключение вкладок
 browser.tabs.onActivated.addListener(async (activeInfo) => {
   try {
     const tab = await browser.tabs.get(activeInfo.tabId);
@@ -86,12 +103,11 @@ browser.tabs.onActivated.addListener(async (activeInfo) => {
   }
 });
 
-// Слушаем обновление страницы (навигация)
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     checkTab(tabId, tab.url);
   }
 });
 
-// Загружаем список при старте
+
 loadList();
