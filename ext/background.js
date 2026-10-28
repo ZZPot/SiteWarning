@@ -7,13 +7,14 @@ const UPDATE_INTERVAL_MINUTES = 60;
 let siteList = {};
 let lastUpdate = 0;
 let localList = true;
-let tags = await (await fetch(browser.runtime.getURL("./tags.json"))).json();
-console.log(tags)
+let tags = {}
+
 
 async function loadList() {
+  tags = await (await fetch(browser.runtime.getURL("./tags.json"))).json();
   if (localList)
   {
-    siteList =  await (await fetch(browser.runtime.getURL("./site_list.json"))).json()
+    siteList = await (await fetch(browser.runtime.getURL("./site_list.json"))).json();
     console.log("Local site list")
   }
   else
