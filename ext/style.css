@@ -1,0 +1,53 @@
+@property --shift
+{
+    syntax: '<length-percentage>';
+    inherits: false;
+    initial-value: 0%;
+}
+
+#warning-frame
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 15px solid transparent;
+    border-image: repeating-linear-gradient(45deg, #fd0 calc(var(--shift) + 25px),
+     #000 calc(var(--shift) + 25px),
+     #000 calc(var(--shift) + 50px),
+     #fd0 calc(var(--shift) + 50px),
+     #fd0 calc(var(--shift) + 80px)) 15;
+    box-sizing: border-box;
+    z-index: 99999;
+    animation: moveBorder 20s linear infinite
+}
+
+#warning-frame + marquee
+{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: 999999;
+  color: #fd0;
+  font-weight: bold;
+  font-size: 10px;
+  font-family: arial;
+  background-clip: text;
+  padding-top: 2px;
+}
+#warning-frame + marquee > span
+{
+  background-color: black;
+  padding: 3px;
+}
+
+@keyframes moveBorder {
+from {
+    --shift: 0%;
+}
+to  {
+    --shift: 100%; 
+    }
+}
