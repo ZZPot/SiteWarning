@@ -32,15 +32,11 @@ async function loadList() {
 
 function getSite(url) {
   try {
-    console.log(siteList)
     const hostname = new URL(url).hostname.toLowerCase();
-    console.log("Check " + hostname)
     let siteKey = Object.keys(siteList).find(siteName => 
     {
-      console.log(siteName)
       if (!siteName.includes("://"))
       {
-        console.log("Comparing " + siteName + " and " + hostname)
         return hostname === siteName || hostname.endsWith("." + siteName);
       }
       return url.toLowerCase().startsWith(siteName);
@@ -61,13 +57,12 @@ function getSite(url) {
   }
 }
 
-
-function onSiteFound(url, siteData)
+async function onSiteFound(url, siteData, tabId)
 {
-  if (siteData["level"] == "warning")
-    notify(url, siteData)
+  if (siteData["tags"].some(tag => (tag in tags && tags[tag]["level"] == "warning")))
+    await notify(url, siteData, tabId)
 }
-function notify(url, siteData) {
+async function notify(url, siteData, tabId) {
   let msg = ""
   if ("tags" in siteData && siteData["tags"].length != 0)
   {
@@ -79,28 +74,38 @@ function notify(url, siteData) {
     title: "⚠️ Сайт из списка",
     message: msg
   });
+  try{
+    await browser.scripting.executeScript({target: {tabId: tabId}, files: ["content.js"]})
+    console.log("Frame added")
+  }
+  catch (err)
+  {
+    console.error(err)
+  }
 }
 
-// Основная проверка вкладки
+
 async function checkTab(tabId, url) {
   if (!url || url.startsWith("about:") || url.startsWith("moz-extension:")) return;
   
-  // Обновляем список, если прошло достаточно времени
+
   if (Date.now() - lastUpdate > UPDATE_INTERVAL_MINUTES * 60 * 1000) {
     await loadList();
   }
   let siteData = getSite(url)
   if (siteData) {
-    onSiteFound(url, siteData);
+    await onSiteFound(url, siteData, tabId);
   }
 }
 
 browser.tabs.onActivated.addListener(async (activeInfo) => {
+  if (activeInfo.previousTabId)
+    return
   try {
     const tab = await browser.tabs.get(activeInfo.tabId);
-    if (tab.url) checkTab(tab.id, tab.url);
+    //if (tab.url) checkTab(tab.id, tab.url);
   } catch (e) {
-    // Вкладка могла быть закрыта
+
   }
 });
 

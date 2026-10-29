@@ -1,17 +1,20 @@
 {
     "manifest_version": 3,
     "name": "Site Warning",
-        "version": "1.0",
+    "version": "1.0",
     "description": "Предупреждает о сомнительных сайтах.",
     "permissions": [
         "tabs",
         "notifications",
-        "storage"
+        "storage",
+        "scripting"
         ],
     "host_permissions": ["<all_urls>"],
+    "action": {"default_title": "Site Warning check"},
     "background": { "scripts": ["background.js"] },
     "browser_specific_settings":
     {
         "gecko": { "id": "site-checker@example.com" }
-    }
+    },
+    "content_scripts":  [{ "matches": ["*://*/*"], "css": ["style.css"]}]
 }
