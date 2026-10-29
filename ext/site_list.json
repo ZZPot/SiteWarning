@@ -1,9 +1,7 @@
 {
-    "meduza.io":
-    {
-        "tags": ["news"]        
-    },
+    "meduza.io": {"tags": ["news"]},
     "wikipedia.org":{"tags": ["info"]},
-    "rt.com": {"tags": ["fakes"], "level": "warning"},
-    "rt-english.com": {"alias": "rt.com"}
+    "rt.com": {"tags": ["fakes"]},
+    "rt-english.com": {"alias": "rt.com"},
+    "localhost": {"tags": ["test"]}
 }
